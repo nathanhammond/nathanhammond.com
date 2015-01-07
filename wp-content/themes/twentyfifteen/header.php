@@ -18,6 +18,8 @@
 	<!--[if lt IE 9]>
 	<script src="<?php echo esc_url( get_template_directory_uri() ); ?>/js/html5.js"></script>
 	<![endif]-->
+	<script type="text/javascript" src="http://fast.fonts.net/jsapi/f8cd41e5-4561-41b2-a213-3722142ffac8.js"></script>
+	<script>(function(){document.documentElement.className='js'})();</script>
 	<?php wp_head(); ?>
 </head>
 
@@ -32,9 +34,9 @@
 					twentyfifteen_the_custom_logo();
 
 					if ( is_front_page() && is_home() ) : ?>
-						<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+						<h1 class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></h1>
 					<?php else : ?>
-						<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
+						<p class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></p>
 					<?php endif;
 
 					$description = get_bloginfo( 'description', 'display' );
