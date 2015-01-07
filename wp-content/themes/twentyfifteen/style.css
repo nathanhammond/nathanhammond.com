@@ -212,7 +212,7 @@ input,
 select,
 textarea {
 	color: #333;
-	font-family: "Noto Serif", serif;
+	font-family: "Helvetica Neue", "HelveticaNeue", "Helvetica", "Arial", "Roboto", sans-serif;
 	font-size: 15px;
 	font-size: 1.5rem;
 	line-height: 1.6;
@@ -966,7 +966,7 @@ a:focus {
 }
 
 .post-navigation .post-title {
-	font-family: "Noto Serif", serif;
+	font-family: "Helvetica Neue", "HelveticaNeue", "Helvetica", "Arial", "Roboto", sans-serif;
 	font-size: 18px;
 	font-size: 1.8rem;
 	line-height: 1.3333;
@@ -1413,7 +1413,7 @@ img.aligncenter {
 }
 
 .widget_calendar caption {
-	font-family: "Noto Serif", serif;
+	font-family: "Helvetica Neue", "HelveticaNeue", "Helvetica", "Arial", "Roboto", sans-serif;
 	font-weight: 700;
 	margin: 0 0 1.6em;
 	letter-spacing: 0.04em;
@@ -2007,7 +2007,7 @@ a.post-thumbnail:focus {
 }
 
 .page-title {
-	font-family: "Noto Serif", serif;
+	font-family: "Helvetica Neue", "HelveticaNeue", "Helvetica", "Arial", "Roboto", sans-serif;
 	font-size: 18px;
 	font-size: 1.8rem;
 	line-height: 1.3333;
@@ -2179,7 +2179,7 @@ a.post-thumbnail:focus {
 
 .comments-title,
 .comment-reply-title {
-	font-family: "Noto Serif", serif;
+	font-family: "Helvetica Neue", "HelveticaNeue", "Helvetica", "Arial", "Roboto", sans-serif;
 	font-size: 18px;
 	font-size: 1.8rem;
 	line-height: 1.3333;
