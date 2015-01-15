@@ -394,7 +394,9 @@ function amt_get_keywords_from_post_cats( $post ) {
 
     $postcats = "";
     foreach((get_the_category($post->ID)) as $cat) {
-        $postcats .= $cat->cat_name . ', ';
+        if ( $cat->cat_name !== "Uncategorized" ) {
+            $postcats .= $cat->cat_name . ', ';
+        }
     }
     // strip final comma
     $postcats = substr($postcats, 0, -2);
