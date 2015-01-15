@@ -735,15 +735,15 @@ function amt_get_schemaorg_author_metatags( $author_id ) {
         $metadata_arr[] = '<meta itemprop="description" content="' . esc_attr( $author_description ) . '" />';
     }
     // image
-    // Try to get the gravatar
-    // Note: We do not use the get_avatar() function since it returns an img element.
-    // Here wqe do not check if "Show Avatars" is unchecked in Settings > Discussion
-    // $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), 96, '', get_the_author_meta('display_name', $author_id) );
-    $author_email = sanitize_email( get_the_author_meta('user_email', $author_id) );
-    if ( !empty( $author_email ) ) {
-        // Contruct gravatar link
-        $gravatar_url = "http://www.gravatar.com/avatar/" . md5( $author_email ) . "?s=" . 128;
-        $metadata_arr[] = '<meta itemprop="image" content="' . esc_url_raw( $gravatar_url ) . '" />';
+    // Parse out of get_avatar()
+    $gravatar_size = 128;
+    $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), $gravatar_size, '', get_the_author_meta('display_name', $author_id) );
+    if ( !empty( $gravatar_img ) ) {
+        $output_array = array();
+        if ( preg_match('/src="([^"]*)"/', $gravatar_img, $output_array) === 1 ) {
+            $gravatar_url = $output_array[1];
+            $metadata_arr[] = '<meta itemprop="image" content="' . esc_url_raw( $gravatar_url ) . '" />';            
+        }
     }
     // url
     // If a Google+ author profile URL has been provided, it has priority,
