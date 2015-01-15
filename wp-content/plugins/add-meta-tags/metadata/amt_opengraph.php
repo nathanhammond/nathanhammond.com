@@ -256,20 +256,18 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         // Locale
         $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
         // Profile Image
-        // Try to get the gravatar
-        // Note: We do not use the get_avatar() function since it returns an img element.
-        // Here we do not check if "Show Avatars" is unchecked in Settings > Discussion
-        $author_email = sanitize_email( $author->user_email );
-        if ( !empty( $author_email ) ) {
-            // Contruct gravatar link
-            $gravatar_size = 128;
-            $gravatar_url = "http://www.gravatar.com/avatar/" . md5( $author_email ) . "?s=" . $gravatar_size;
-            $metadata_arr[] = '<meta property="og:image" content="' . esc_url_raw( $gravatar_url ) . '" />';
-            $metadata_arr[] = '<meta property="og:imagesecure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $gravatar_url ) ) . '" />';
-            if ( apply_filters( 'amt_extended_image_tags', true ) ) {
-                $metadata_arr[] = '<meta property="og:image:width" content="' . esc_attr( $gravatar_size ) . '" />';
-                $metadata_arr[] = '<meta property="og:image:height" content="' . esc_attr( $gravatar_size ) . '" />';
-                $metadata_arr[] = '<meta property="og:image:type" content="image/jpeg" />';
+        $gravatar_size = 128;
+        $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), $gravatar_size, '', get_the_author_meta('display_name', $author_id) );
+        if ( !empty( $gravatar_img ) ) {
+            $output_array = array();
+            if ( preg_match('/src="([^"]*)"/', $gravatar_img, $output_array) === 1 ) {
+                $gravatar_url = $output_array[1];
+                $metadata_arr[] = '<meta property="og:image" content="' . esc_url_raw( $gravatar_url ) . '" />';
+                if ( apply_filters( 'amt_extended_image_tags', true ) ) {
+                    $metadata_arr[] = '<meta property="og:image:width" content="' . esc_attr( $gravatar_size ) . '" />';
+                    $metadata_arr[] = '<meta property="og:image:height" content="' . esc_attr( $gravatar_size ) . '" />';
+                    $metadata_arr[] = '<meta property="og:image:type" content="image/jpeg" />';
+                }
             }
         }
         // Profile data (only on the 1st page of the archive)
