@@ -115,7 +115,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="og:description" content="' . esc_attr( amt_process_paged( get_bloginfo('description') ) ) . '" />';
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_site()) ) . '" />';
         // Site Image
         // Use the default image, if one has been set.
         if (!empty($options["default_image_url"])) {
@@ -149,7 +149,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="og:description" content="' . esc_attr( amt_process_paged( get_bloginfo('description') ) ) . '" />';
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
         // Site Image
         if ( function_exists('has_post_thumbnail') && has_post_thumbnail( $post->ID ) ) {
             // Allow filtering of the image size.
@@ -183,10 +183,10 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="og:description" content="' . esc_attr( amt_process_paged( $content_desc ) ) . '" />';
         } elseif (get_bloginfo('description')) {
             // Alternatively use a generic description
-            $metadata_arr[] = '<meta property="og:description" content="' . amt_process_paged( "An index of the lastest content." ) . '" />';
+            $metadata_arr[] = '<meta property="og:description" content="' . amt_process_paged( "An index of the latest content." ) . '" />';
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
         // Site Image
         if ( function_exists('has_post_thumbnail') && has_post_thumbnail( $post->ID ) ) {
             // Allow filtering of the image size.
@@ -254,7 +254,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             }
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
         // Profile Image
         $gravatar_size = 128;
         $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), $gravatar_size, '', get_the_author_meta('display_name', $author_id) );
@@ -310,7 +310,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="og:description" content="' . esc_attr( $content_desc ) . '" />';
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
         // Dates
         $metadata_arr[] = '<meta property="article:published_time" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
         $metadata_arr[] = '<meta property="article:modified_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
@@ -379,7 +379,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="og:description" content="' . esc_attr( amt_process_paged( $content_desc ) ) . '" />';
         }
         // Locale
-        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', get_bloginfo('language')) ) . '" />';
+        $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
         // Dates
         $metadata_arr[] = '<meta property="article:published_time" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
         $metadata_arr[] = '<meta property="article:modified_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
