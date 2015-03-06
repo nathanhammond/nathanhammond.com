@@ -257,21 +257,18 @@ function amt_process_paged( $data ) {
  *
  * MUST return sanitized text.
  */
-function amt_get_the_excerpt( $post, $init_text_len=500, $excerpt_max_len=300, $desc_avg_length=250, $desc_min_length=150 ) {
+function amt_get_the_excerpt( $post, $excerpt_max_len=300, $desc_avg_length=250, $desc_min_length=150 ) {
     
     if ( empty($post->post_excerpt) || get_post_type( $post ) == 'attachment' ) {   // In attachments we always use $post->post_content to get a description
 
         // Here we generate an excerpt from $post->post_content
 
-        // Get the initial text.
-        // We perform the sanitization of the text in two stages.
-        // First, we use a bigger amount of text and strip tags
-        $amt_excerpt = sanitize_text_field( substr($post->post_content, 0, $init_text_len) );
-        // Second, we use $excerpt_max_len characters of the text for the description.
-        $amt_excerpt = sanitize_text_field( amt_sanitize_description( substr($amt_excerpt, 0, $excerpt_max_len) ) );
+        // First strip all HTML tags
+        $plain_text = wp_kses( $post->post_content, array() );
 
-        // OLD (single step): Get the initial data for the excerpt
-        //$amt_excerpt = sanitize_text_field( amt_sanitize_description( substr($post->post_content, 0, $excerpt_max_len) ) );
+        // Get the initial text.
+        // We use $excerpt_max_len characters of the text for the description.
+        $amt_excerpt = sanitize_text_field( amt_sanitize_description( substr($plain_text, 0, $excerpt_max_len) ) );
 
         // Remove any URLs that may exist exactly at the beginning of the description.
         // This may happen if for example you put a youtube video url first thing in
@@ -1171,6 +1168,20 @@ function amt_get_posts_page_id() {
  */
 function amt_get_embedded_media( $post ) {
 
+    // Post content pre-processing
+
+    // At this point we give devs the opportunity to inject raw URLs of
+    // supported embeddable media, so that they can be picked up by
+    // the algorithms below.
+    // Array of URLs of supported embeddable media.
+    $external_media_urls = apply_filters( 'amt_embedded_media_external', array(), $post );
+
+    // Store post body
+    $post_body = $post->post_content;
+    // Attach the external media URLs to the post content.
+    //$post_body .= sprintf( '\n%s\n', implode('\n', $external_media_urls) );
+    $post_body .= PHP_EOL . implode(PHP_EOL, $external_media_urls) . PHP_EOL;
+
     // Format of the array
     // Embeds are grouped by type images/videos/sounds
     // Embedded media are added to any group as an associative array.
@@ -1193,7 +1204,7 @@ function amt_get_embedded_media( $post ) {
     //$pattern = '#youtube.com/watch\?v=([-|~_0-9A-Za-z]+)#';
     //$pattern = '#http:\/\/(?:www.)?youtube.com\/.*v=(\w*)#i';
     $pattern = '#https?:\/\/(?:www.)?youtube.com\/.*v=([a-zA-Z0-9_-]+)#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of YT video URLS
@@ -1203,8 +1214,8 @@ function amt_get_embedded_media( $post ) {
             $item = array(
                 'type' => 'youtube',
                 'page' => 'https://www.youtube.com/watch?v=' . $youtube_video_id,
-                //'player' => 'https://youtube.com/v/' . $youtube_video_id,
-                'player' => 'https://www.youtube.com/embed/' . $youtube_video_id,
+                'player' => 'https://youtube.com/v/' . $youtube_video_id,
+                //'player' => 'https://www.youtube.com/embed/' . $youtube_video_id,
                 // Since we can construct the video thumbnail from the ID, we add it
                 'thumbnail' => apply_filters( 'amt_oembed_youtube_image_preview', 'https://img.youtube.com/vi/' . $youtube_video_id . '/sddefault.jpg', $youtube_video_id ),
                 //'thumbnail' => apply_filters( 'amt_oembed_youtube_image_preview', '', $youtube_video_id ),
@@ -1225,8 +1236,8 @@ function amt_get_embedded_media( $post ) {
     // Check output of:  http://vimeo.com/api/v2/video/VIDEO_ID.xml
     // INVALID METHOD: 'thumbnail' => 'https://i.vimeocdn.com/video/' . $vimeo_video_id . '_640.jpg'
     //$pattern = '#vimeo.com/([-|~_0-9A-Za-z]+)#';
-    $pattern = '#https?:\/\/(?:www.)?vimeo.com\/(\d*)#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    $pattern = '#https?:\/\/(?:www.)?vimeo.com\/(\d+)#i';
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of Vimeo video URLS
@@ -1250,7 +1261,7 @@ function amt_get_embedded_media( $post ) {
     // - https://vine.co/v/VIDEO_ID
     // Also check output of:  https://vine.co/v/bwBYItOUKrw/card
     $pattern = '#https?:\/\/(?:www.)?vine.co\/v\/([a-zA-Z0-9_-]+)#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of Vimeo video URLS
@@ -1282,7 +1293,7 @@ function amt_get_embedded_media( $post ) {
     // player:
     // https://w.soundcloud.com/player/?url=https://api.soundcloud.com/tracks/117455833
     $pattern = '#https?:\/\/(?:www.)?soundcloud.com\/[^/]+\/[a-zA-Z0-9_-]+#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of Soundcloud URLS
@@ -1330,7 +1341,7 @@ function amt_get_embedded_media( $post ) {
     //
     $pattern = '#https?:\/\/(?:www.)?flickr.com\/photos\/[^\/]+\/[^\/]+\/#i';
     //$pattern = '#https?://(?:www.)?flickr.com/photos/[^/]+/[^/]+/#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of Flickr image page URLS
@@ -1375,7 +1386,7 @@ function amt_get_embedded_media( $post ) {
     // Embedded URLs MUST be of Format: https://instagram.com/p/IMAGE_ID/
     //
     $pattern = '#https?:\/\/(?:www.)?instagram.com\/p\/[^\/]+\/#i';
-    preg_match_all( $pattern, $post->post_content, $matches );
+    preg_match_all( $pattern, $post_body, $matches );
     //var_dump($matches);
     if ($matches) {
         // $matches[0] contains a list of Flickr image page URLS

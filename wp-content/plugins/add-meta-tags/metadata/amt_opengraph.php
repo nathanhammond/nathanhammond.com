@@ -42,6 +42,9 @@
  * Opengraph Specification: http://ogp.me
  *
  * Module containing functions related to Opengraph Protocol Metadata
+ *
+ * article object: https://developers.facebook.com/docs/reference/opengraph/object-type/article/
+ * video.other object: https://developers.facebook.com/docs/reference/opengraph/object-type/video.other/
  */
 
 // Prevent direct access to this file.
@@ -255,21 +258,35 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         }
         // Locale
         $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
+
         // Profile Image
-        $gravatar_size = 128;
-        $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), $gravatar_size, '', get_the_author_meta('display_name', $author_id) );
-        if ( !empty( $gravatar_img ) ) {
-            $output_array = array();
-            if ( preg_match('/src="([^"]*)"/', $gravatar_img, $output_array) === 1 ) {
-                $gravatar_url = $output_array[1];
-                $metadata_arr[] = '<meta property="og:image" content="' . esc_url_raw( $gravatar_url ) . '" />';
-                if ( apply_filters( 'amt_extended_image_tags', true ) ) {
-                    $metadata_arr[] = '<meta property="og:image:width" content="' . esc_attr( $gravatar_size ) . '" />';
-                    $metadata_arr[] = '<meta property="og:image:height" content="' . esc_attr( $gravatar_size ) . '" />';
-                    $metadata_arr[] = '<meta property="og:image:type" content="image/jpeg" />';
-                }
+        $author_email = sanitize_email( $author->user_email );
+        $avatar_size = apply_filters( 'amt_avatar_size', 128 );
+        $avatar_url = '';
+        // First try to get the avatar link by using get_avatar().
+        // Important: for this to work the "Show Avatars" option should be enabled in Settings > Discussion.
+        $avatar_img = get_avatar( get_the_author_meta('ID', $author->ID), $avatar_size, '', get_the_author_meta('display_name', $author->ID) );
+        if ( ! empty($avatar_img) ) {
+            if ( preg_match("#src=['\"]([^'\"]+)['\"]#", $avatar_img, $matches) ) {
+                $avatar_url = $matches[1];
+            }
+        } elseif ( ! empty($author_email) ) {
+            // If the user has provided an email, we use it to construct a gravatar link.
+            $avatar_url = "http://www.gravatar.com/avatar/" . md5( $author_email ) . "?s=" . $avatar_size;
+        }
+        if ( ! empty($avatar_url) ) {
+            //$avatar_url = html_entity_decode($avatar_url, ENT_NOQUOTES, 'UTF-8');
+            $metadata_arr[] = '<meta property="og:image" content="' . esc_url_raw( $avatar_url ) . '" />';
+            $metadata_arr[] = '<meta property="og:imagesecure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $avatar_url ) ) . '" />';
+            if ( apply_filters( 'amt_extended_image_tags', true ) ) {
+                $metadata_arr[] = '<meta property="og:image:width" content="' . esc_attr( $avatar_size ) . '" />';
+                $metadata_arr[] = '<meta property="og:image:height" content="' . esc_attr( $avatar_size ) . '" />';
+                // Since we do not have a way to determine the image type, the following meta tag is commented out
+                // TODO: make a function that detects the image type from the file extension (if a file extension is available)
+                //$metadata_arr[] = '<meta property="og:image:type" content="image/jpeg" />';
             }
         }
+
         // Profile data (only on the 1st page of the archive)
         if ( ! is_paged() ) {
             // Profile first and last name
@@ -295,9 +312,17 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         // First add metadata common to all attachment types.
 
         // Type
-        // Note: there is no specific type for images/videos/audio. We use article.
+        // Note: there is no specific type for images/audio. We use article amd video
         // TODO: Check whether we could use another type specific to each attachment type.
-        $metadata_arr[] = '<meta property="og:type" content="article" />';
+        if ( 'video' == $attachment_type ) {
+            // video.other og:type for video attachment pages
+            $og_type = 'video.other';
+        } else {
+            $og_type = 'article';
+        }
+        $og_type = apply_filters( 'amt_opengraph_og_type_attachment', $og_type );
+        $metadata_arr[] = '<meta property="og:type" content="' . esc_attr( $og_type ) . '" />';
+
         // Site Name
         $metadata_arr[] = '<meta property="og:site_name" content="' . esc_attr( get_bloginfo('name') ) . '" />';
         // Title
@@ -311,6 +336,37 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         }
         // Locale
         $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
+
+        // og:updated_time
+        $metadata_arr[] = '<meta property="og:updated_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
+
+        // Metadata specific to each attachment type
+
+        if ( 'image' == $attachment_type ) {
+
+            // Allow filtering of the image size.
+            $image_size = apply_filters( 'amt_image_size_attachment', 'large' );
+            $metadata_arr = array_merge( $metadata_arr, amt_get_opengraph_image_metatags( $post->ID, $size=$image_size ) );
+
+        } elseif ( 'video' == $attachment_type ) {
+            
+            // Video tags
+            $metadata_arr[] = '<meta property="og:video" content="' . esc_url_raw( wp_get_attachment_url($post->ID) ) . '" />';
+            //$metadata_arr[] = '<meta property="og:video:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
+            //$metadata_arr[] = '<meta property="og:video:width" content="' . esc_attr( $main_size_meta[1] ) . '" />';
+            //$metadata_arr[] = '<meta property="og:video:height" content="' . esc_attr( $main_size_meta[2] ) . '" />';
+            $metadata_arr[] = '<meta property="og:video:type" content="' . esc_attr( $mime_type ) . '" />';
+
+        } elseif ( 'audio' == $attachment_type ) {
+            
+            // Audio tags
+            $metadata_arr[] = '<meta property="og:audio" content="' . esc_url_raw( wp_get_attachment_url($post->ID) ) . '" />';
+            //$metadata_arr[] = '<meta property="og:audio:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
+            $metadata_arr[] = '<meta property="og:audio:type" content="' . esc_attr( $mime_type ) . '" />';
+        }
+
+        // Article: meta tags
+
         // Dates
         $metadata_arr[] = '<meta property="article:published_time" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
         $metadata_arr[] = '<meta property="article:modified_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
@@ -333,31 +389,6 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             $metadata_arr[] = '<meta property="article:publisher" content="' . esc_url_raw( trailingslashit( get_bloginfo('url') ) ) . '" />';
         }
 
-        // Metadata specific to each attachment type
-
-        if ( 'image' == $attachment_type ) {
-
-            // Allow filtering of the image size.
-            $image_size = apply_filters( 'amt_image_size_attachment', 'large' );
-            $metadata_arr = array_merge( $metadata_arr, amt_get_opengraph_image_metatags( $post->ID, $size=$image_size ) );
-
-        } elseif ( 'video' == $attachment_type ) {
-            
-            // Video tags
-            $metadata_arr[] = '<meta property="og:video" content="' . esc_url_raw( $post->guid ) . '" />';
-            //$metadata_arr[] = '<meta property="og:video:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
-            //$metadata_arr[] = '<meta property="og:video:width" content="' . esc_attr( $main_size_meta[1] ) . '" />';
-            //$metadata_arr[] = '<meta property="og:video:height" content="' . esc_attr( $main_size_meta[2] ) . '" />';
-            $metadata_arr[] = '<meta property="og:video:type" content="' . esc_attr( $mime_type ) . '" />';
-
-        } elseif ( 'audio' == $attachment_type ) {
-            
-            // Audio tags
-            $metadata_arr[] = '<meta property="og:audio" content="' . esc_url_raw( $post->guid ) . '" />';
-            //$metadata_arr[] = '<meta property="og:audio:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
-            $metadata_arr[] = '<meta property="og:audio:type" content="' . esc_attr( $mime_type ) . '" />';
-        }
-
 
     // Posts, pages, custom content types (attachments excluded, caught in previous clause)
     // Note: content might be multipage. Process with amt_process_paged() wherever needed.
@@ -365,8 +396,17 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
 
         // Site Name
         $metadata_arr[] = '<meta property="og:site_name" content="' . esc_attr( get_bloginfo('name') ) . '" />';
+
         // Type
-        $metadata_arr[] = '<meta property="og:type" content="article" />';
+        // og:type set to 'video.other' for posts with post format set to video
+        if ( get_post_format($post->ID) == 'video' ) {
+            $og_type = 'video.other';
+        } else {
+            $og_type = 'article';
+        }
+        $og_type = apply_filters( 'amt_opengraph_og_type_content', $og_type );
+        $metadata_arr[] = '<meta property="og:type" content="' . esc_attr( $og_type ) . '" />';
+
         // Title
         // Note: Contains multipage information through amt_process_paged()
         $metadata_arr[] = '<meta property="og:title" content="' . esc_attr( amt_process_paged( get_the_title($post->ID) ) ) . '" />';
@@ -380,54 +420,9 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         }
         // Locale
         $metadata_arr[] = '<meta property="og:locale" content="' . esc_attr( str_replace('-', '_', amt_get_language_content()) ) . '" />';
-        // Dates
-        $metadata_arr[] = '<meta property="article:published_time" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
-        $metadata_arr[] = '<meta property="article:modified_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
 
-        // Author
-        // If a Facebook author profile URL has been provided, it has priority,
-        // Otherwise fall back to the WordPress author archive.
-        $fb_author_url = get_the_author_meta('amt_facebook_author_profile_url', $post->post_author);
-        if ( !empty($fb_author_url) ) {
-            $metadata_arr[] = '<meta property="article:author" content="' . esc_url_raw( $fb_author_url, array('http', 'https', 'mailto') ) . '" />';
-        } else {
-            $metadata_arr[] = '<meta property="article:author" content="' . esc_url_raw( get_author_posts_url( get_the_author_meta( 'ID', $post->post_author ) ) ) . '" />';
-        }
-
-        // Publisher
-        // If a Facebook publisher profile URL has been provided, it has priority,
-        // Otherwise fall back to the WordPress blog home url.
-        $fb_publisher_url = get_the_author_meta('amt_facebook_publisher_profile_url', $post->post_author);
-        if ( !empty($fb_publisher_url) ) {
-            $metadata_arr[] = '<meta property="article:publisher" content="' . esc_url_raw( $fb_publisher_url, array('http', 'https', 'mailto') ) . '" />';
-        } else {
-            $metadata_arr[] = '<meta property="article:publisher" content="' . esc_url_raw( trailingslashit( get_bloginfo('url') ) ) . '" />';
-        }
-
-        /*
-        // article:section: We use the first category as the section.
-        $first_cat = amt_get_first_category($post);
-        if ( ! empty( $first_cat ) ) {
-            $metadata_arr[] = '<meta property="article:section" content="' . esc_attr( $first_cat ) . '" />';
-        }
-        */
-        // article:section: We use print an ``article:section`` meta tag for each of the post's categories.
-        foreach( get_the_category($post->ID) as $cat ) {
-            $section = trim( $cat->cat_name );
-            if ( ! empty( $section ) && $section !== "Uncategorized" ) {
-                $metadata_arr[] = '<meta property="article:section" content="' . esc_attr( $section ) . '" />';
-            }
-        }
-        
-        // article:tag: Keywords are listed as post tags
-        $keywords = explode(',', amt_get_content_keywords($post));
-        foreach ($keywords as $tag) {
-            $tag = trim( $tag );
-            if (!empty($tag)) {
-                $metadata_arr[] = '<meta property="article:tag" content="' . esc_attr( $tag ) . '" />';
-            }
-        }
-
+        // og:updated_time
+        $metadata_arr[] = '<meta property="og:updated_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
 
         // We store the featured image ID in this variable so that it can easily be excluded
         // when all images are parsed from the $attachments array.
@@ -471,7 +466,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
                 } elseif ( 'video' == $attachment_type ) {
                     
                     // Video tags
-                    $metadata_arr[] = '<meta property="og:video" content="' . esc_url_raw( $attachment->guid ) . '" />';
+                    $metadata_arr[] = '<meta property="og:video" content="' . esc_url_raw( wp_get_attachment_url($attachment->ID) ) . '" />';
                     //$metadata_arr[] = '<meta property="og:video:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
                     //$metadata_arr[] = '<meta property="og:video:width" content="' . esc_attr( $main_size_meta[1] ) . '" />';
                     //$metadata_arr[] = '<meta property="og:video:height" content="' . esc_attr( $main_size_meta[2] ) . '" />';
@@ -480,7 +475,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
                 } elseif ( 'audio' == $attachment_type ) {
                     
                     // Audio tags
-                    $metadata_arr[] = '<meta property="og:audio" content="' . esc_url_raw( $attachment->guid ) . '" />';
+                    $metadata_arr[] = '<meta property="og:audio" content="' . esc_url_raw( wp_get_attachment_url($attachment->ID) ) . '" />';
                     //$metadata_arr[] = '<meta property="og:audio:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $main_size_meta[0]) ) . '" />';
                     $metadata_arr[] = '<meta property="og:audio:type" content="' . esc_attr( $mime_type ) . '" />';
                 }
@@ -505,6 +500,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         foreach( $embedded_media['videos'] as $embedded_item ) {
 
             $metadata_arr[] = '<meta property="og:video" content="' . esc_url_raw( $embedded_item['player'] ) . '" />';
+            $metadata_arr[] = '<meta property="og:video:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $embedded_item['player']) ) . '" />';
             $metadata_arr[] = '<meta property="og:video:type" content="application/x-shockwave-flash" />';
             $metadata_arr[] = '<meta property="og:video:width" content="' . esc_attr( $embedded_item['width'] ) . '" />';
             $metadata_arr[] = '<meta property="og:video:height" content="' . esc_attr( $embedded_item['height'] ) . '" />';
@@ -513,6 +509,7 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
         foreach( $embedded_media['sounds'] as $embedded_item ) {
 
             $metadata_arr[] = '<meta property="og:audio" content="' . esc_url_raw( $embedded_item['player'] ) . '" />';
+            $metadata_arr[] = '<meta property="og:audio:secure_url" content="' . esc_url_raw( str_replace('http:', 'https:', $embedded_item['player']) ) . '" />';
             $metadata_arr[] = '<meta property="og:audio:type" content="application/x-shockwave-flash" />';
 
         }
@@ -530,6 +527,78 @@ function amt_add_opengraph_metadata_head( $post, $attachments, $embedded_media, 
             if ( ! empty( $referenced_url ) ) {
                 $metadata_arr[] = '<meta property="og:referenced" content="' . esc_url_raw( $referenced_url ) . '" />';
             }
+        }
+
+        // Article: meta tags
+
+        if ( $og_type == 'article' ) {
+
+            // Dates
+            $metadata_arr[] = '<meta property="article:published_time" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
+            $metadata_arr[] = '<meta property="article:modified_time" content="' . esc_attr( amt_iso8601_date($post->post_modified) ) . '" />';
+
+            // Author
+            // If a Facebook author profile URL has been provided, it has priority,
+            // Otherwise fall back to the WordPress author archive.
+            $fb_author_url = get_the_author_meta('amt_facebook_author_profile_url', $post->post_author);
+            if ( !empty($fb_author_url) ) {
+                $metadata_arr[] = '<meta property="article:author" content="' . esc_url_raw( $fb_author_url, array('http', 'https', 'mailto') ) . '" />';
+            } else {
+                $metadata_arr[] = '<meta property="article:author" content="' . esc_url_raw( get_author_posts_url( get_the_author_meta( 'ID', $post->post_author ) ) ) . '" />';
+            }
+
+            // Publisher
+            // If a Facebook publisher profile URL has been provided, it has priority,
+            // Otherwise fall back to the WordPress blog home url.
+            $fb_publisher_url = get_the_author_meta('amt_facebook_publisher_profile_url', $post->post_author);
+            if ( !empty($fb_publisher_url) ) {
+                $metadata_arr[] = '<meta property="article:publisher" content="' . esc_url_raw( $fb_publisher_url, array('http', 'https', 'mailto') ) . '" />';
+            } else {
+                $metadata_arr[] = '<meta property="article:publisher" content="' . esc_url_raw( trailingslashit( get_bloginfo('url') ) ) . '" />';
+            }
+
+            /*
+            // article:section: We use the first category as the section.
+            $first_cat = amt_get_first_category($post);
+            if ( ! empty( $first_cat ) ) {
+                $metadata_arr[] = '<meta property="article:section" content="' . esc_attr( $first_cat ) . '" />';
+            }
+            */
+            // article:section: We use print an ``article:section`` meta tag for each of the post's categories.
+            foreach( get_the_category($post->ID) as $cat ) {
+                $section = trim( $cat->cat_name );
+                if ( ! empty( $section ) ) {
+                    $metadata_arr[] = '<meta property="article:section" content="' . esc_attr( $section ) . '" />';
+                }
+            }
+            
+            // article:tag: Keywords are listed as post tags
+            $keywords = explode(',', amt_get_content_keywords($post));
+            foreach ($keywords as $tag) {
+                $tag = trim( $tag );
+                if (!empty($tag)) {
+                    $metadata_arr[] = '<meta property="article:tag" content="' . esc_attr( $tag ) . '" />';
+                }
+            }
+
+        }
+
+        // video.other meta tags
+
+        elseif ( $og_type == 'video.other' ) {
+
+            // Dates
+            $metadata_arr[] = '<meta property="video:release_date" content="' . esc_attr( amt_iso8601_date($post->post_date) ) . '" />';
+
+            // video:tag: Keywords are listed as post tags
+            $keywords = explode(',', amt_get_content_keywords($post));
+            foreach ($keywords as $tag) {
+                $tag = trim( $tag );
+                if (!empty($tag)) {
+                    $metadata_arr[] = '<meta property="video:tag" content="' . esc_attr( $tag ) . '" />';
+                }
+            }
+
         }
 
     }
