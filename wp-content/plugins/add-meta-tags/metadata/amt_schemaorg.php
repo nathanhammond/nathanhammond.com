@@ -309,7 +309,7 @@ function amt_add_schemaorg_metadata_content_filter( $post_body ) {
             // Video specific metatags
             // URL (for attachments: links to attachment page)
             $metadata_arr[] = '<meta itemprop="url" content="' . esc_url_raw( get_permalink( $post->ID ) ) . '" />';
-            $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( $post->guid ) . '" />';
+            $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( wp_get_attachment_url($post->ID) ) . '" />';
             $metadata_arr[] = '<meta itemprop="encodingFormat" content="' . esc_attr( $mime_type ) . '" />';
             // Add the post body here
             $metadata_arr[] = $post_body;
@@ -321,7 +321,7 @@ function amt_add_schemaorg_metadata_content_filter( $post_body ) {
             // Audio specific metatags
             // URL (for attachments: links to attachment page)
             $metadata_arr[] = '<meta itemprop="url" content="' . esc_url_raw( get_permalink( $post->ID ) ) . '" />';
-            $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( $post->guid ) . '" />';
+            $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( wp_get_attachment_url($post->ID) ) . '" />';
             $metadata_arr[] = '<meta itemprop="encodingFormat" content="' . esc_attr( $mime_type ) . '" />';
             // Add the post body here
             $metadata_arr[] = $post_body;
@@ -390,7 +390,7 @@ function amt_add_schemaorg_metadata_content_filter( $post_body ) {
         */
         foreach( get_the_category($post->ID) as $cat ) {
             $section = trim( $cat->cat_name );
-            if ( ! empty( $section ) && $section !== "Uncategorized" ) {
+            if ( ! empty( $section ) ) {
                 $metadata_arr[] = '<meta itemprop="articleSection" content="' . esc_attr( $section ) . '" />';
             }
         }
@@ -480,7 +480,7 @@ function amt_add_schemaorg_metadata_content_filter( $post_body ) {
                     // Video specific metatags
                     // URL (for attachments: links to attachment page)
                     $metadata_arr[] = '<meta itemprop="url" content="' . esc_url_raw( get_permalink( $attachment->ID ) ) . '" />';
-                    $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( $attachment->guid ) . '" />';
+                    $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( wp_get_attachment_url($attachment->ID) ) . '" />';
                     $metadata_arr[] = '<meta itemprop="encodingFormat" content="' . esc_attr( $mime_type ) . '" />';
                     // Scope END: VideoObject
                     $metadata_arr[] = '</span> <!-- Scope END: VideoObject -->';
@@ -493,7 +493,7 @@ function amt_add_schemaorg_metadata_content_filter( $post_body ) {
                     // Audio specific metatags
                     // URL (for attachments: links to attachment page)
                     $metadata_arr[] = '<meta itemprop="url" content="' . esc_url_raw( get_permalink( $attachment->ID ) ) . '" />';
-                    $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( $attachment->guid ) . '" />';
+                    $metadata_arr[] = '<meta itemprop="contentUrl" content="' . esc_url_raw( wp_get_attachment_url($attachment->ID) ) . '" />';
                     $metadata_arr[] = '<meta itemprop="encodingFormat" content="' . esc_attr( $mime_type ) . '" />';
                     // Scope END: AudioObject
                     $metadata_arr[] = '</span> <!-- Scope END: AudioObject -->';
@@ -737,17 +737,27 @@ function amt_get_schemaorg_author_metatags( $author_id ) {
     if ( !empty($author_description) ) {
         $metadata_arr[] = '<meta itemprop="description" content="' . esc_attr( $author_description ) . '" />';
     }
-    // image
-    // Parse out of get_avatar()
-    $gravatar_size = 128;
-    $gravatar_img = get_avatar( get_the_author_meta('ID', $author_id), $gravatar_size, '', get_the_author_meta('display_name', $author_id) );
-    if ( !empty( $gravatar_img ) ) {
-        $output_array = array();
-        if ( preg_match('/src="([^"]*)"/', $gravatar_img, $output_array) === 1 ) {
-            $gravatar_url = $output_array[1];
-            $metadata_arr[] = '<meta itemprop="image" content="' . esc_url_raw( $gravatar_url ) . '" />';            
+
+    // Profile Image
+    $author_email = sanitize_email( get_the_author_meta('user_email', $author_id) );
+    $avatar_size = apply_filters( 'amt_avatar_size', 128 );
+    $avatar_url = '';
+    // First try to get the avatar link by using get_avatar().
+    // Important: for this to work the "Show Avatars" option should be enabled in Settings > Discussion.
+    $avatar_img = get_avatar( get_the_author_meta('ID', $author_id), $avatar_size, '', get_the_author_meta('display_name', $author_id) );
+    if ( ! empty($avatar_img) ) {
+        if ( preg_match("#src=['\"]([^'\"]+)['\"]#", $avatar_img, $matches) ) {
+            $avatar_url = $matches[1];
         }
+    } elseif ( ! empty($author_email) ) {
+        // If the user has provided an email, we use it to construct a gravatar link.
+        $avatar_url = "http://www.gravatar.com/avatar/" . md5( $author_email ) . "?s=" . $avatar_size;
     }
+    if ( ! empty($avatar_url) ) {
+        //$avatar_url = html_entity_decode($avatar_url, ENT_NOQUOTES, 'UTF-8');
+        $metadata_arr[] = '<meta itemprop="image" content="' . esc_url_raw( $avatar_url ) . '" />';
+    }
+
     // url
     // If a Google+ author profile URL has been provided, it has priority,
     // Otherwise fall back to the WordPress author archive.

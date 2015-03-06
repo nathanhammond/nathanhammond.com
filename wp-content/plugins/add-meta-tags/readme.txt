@@ -4,7 +4,7 @@ Donate link: http://bit.ly/HvUakt
 Tags: amt, meta, metadata, seo, optimize, ranking, description, keywords, metatag, schema, opengraph, dublin core, schema.org, microdata, google, twitter cards, google plus, yahoo, bing, search engine optimization, rich snippets, semantic, structured, meta tags
 Requires at least: 3.1.0
 Tested up to: 4.2
-Stable tag: 2.6.8
+Stable tag: 2.7.1
 License: Apache License v2
 License URI: http://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -246,6 +246,7 @@ The available filters are:
 1. `amt_external_full_metatags_fields` - applied to the list of external custom fields from which Add-Meta-Tags can read full meta tag HTML code. The hooked function should accept and return 1 argument: an array of field names. The hooked function can also accept the post ID as a second optional argument. Keep in mind that Add-Meta-Tags always saves full meta tag data to its default field, regardless of the field the data was read from.
 1. `amt_external_referenced_list_fields` - applied to the list of external custom fields from which Add-Meta-Tags can read lists of URLs of referenced items. The hooked function should accept and return 1 argument: an array of field names. The hooked function can also accept the post ID as a second optional argument. Keep in mind that Add-Meta-Tags always saves URL lists of referenced items to its default field, regardless of the field the data was read from.
 1. `amt_embedded_media` - applied to the array in which Add-Meta-Tags stores information about the embedded media. The hooked function should accept and return 1 argument: an array of post types. The hooked function can also accept the post ID as a second optional argument.
+1. `amt_embedded_media_external` - may be used to inject URLs of supported embeddable media to the content that is used by the alforithm that detects embeddable media in the post content. By default this array is empty. The hooked function should accept and return 2 argumenta: 1) an array of URLs 2) the post object.
 1. `amt_valid_full_metatag_html` - applied to all list of valid HTML elements and attributes that can be used in the 'Full Meta Tags' boxes in the general settings and in the metabox. The hooked function should accept and return 1 argument: an array of valid elements and their attributes. The provided array has the same format as the `$allowed_html` array of the <a href="http://codex.wordpress.org/Function_Reference/wp_kses">wp_kses function</a>.
 1. `amt_image_size_index` - applied to the image size that is used when generating image related meta tags for the front/archive pages. By default, the size `medium` is used. The hooked function should accept and return 1 argument: a string containing either one of the default image sizes (thumbnail, medium, large, full) defined by WordPress or the name of any other user-defined image size.
 1. `amt_image_size_content` - applied to the image size that is used when generating image related meta tags for content pages. By default, the size `medium` is used. The hooked function should accept and return 1 argument: a string containing either one of the default image sizes (thumbnail, medium, large, full) defined by WordPress or the name of any other user-defined image size.
@@ -572,6 +573,19 @@ Screenshots as of v2.4.0
 
 Please check out the changelog of each release by following the links below. You can also check the [roadmap](http://www.codetrax.org/projects/wp-add-meta-tags/roadmap "Add-Meta-Tags Roadmap") regarding future releases of the plugin.
 
+- [2.7.1](http://www.codetrax.org/versions/229)
+ - Reverted back to old youtube player URL due to problems with Facebook streaming.
+- [2.7.0](http://www.codetrax.org/versions/228)
+ - Updated Opengraph generator. (props to Noorhackim for ideas and useful feedback)
+ - The Opengraph generator now supports 'article' and 'video.other' objects. 'video.other' is automatically set on video attachment pages and on posts with their post format set to 'video'.
+ - Various minor improvements and fixes.
+- [2.6.11](http://www.codetrax.org/versions/279)
+ - Final improvements of the description auto-generation algorithm. (props to TheAwesomer for all the useful feedback)
+- [2.6.10](http://www.codetrax.org/versions/278)
+ - Avatar URL that is used in Schema.org and Opengraph metadata no longer tied to the Gravatar service. (props to Nathan Hammond for ideas and sample code)
+- [2.6.9](http://www.codetrax.org/versions/277)
+ - Added support for og:type=video in OpenGraph metadata. Please find more information in the 'Opengraph Metadata' section of the plugin's admin panel.
+ - Added filter that makes it possible to manually add links of supported embeddable media.
 - [2.6.8](http://www.codetrax.org/versions/276)
  - Fine tuned the algorithm that generates the automatic description to resolve issues with HTML tags not being fully removed.
 - [2.6.7](http://www.codetrax.org/versions/275)
