@@ -716,7 +716,7 @@ function amt_get_content_keywords($post, $auto=true) {
         }
     }
 
-    return $content_keywords;
+    return str_replace('uncategorized, ', '', $content_keywords);
 }
 
 
