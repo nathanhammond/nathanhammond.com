@@ -1,22 +1,26 @@
-=== RS FeedBurner ===
+=== RS FeedBurner - Easy Implementation of FeedBurner, FeedPress, and FeedBlitz Feeds ===
 Contributors: RedSand
 Donate link: http://www.redsandmarketing.com/rs-feedburner-donate/
-Tags: feedburner, feedpress, feedblitz, feed, feeds, feedsmith, redirect, redirects, rss, seo, subscribe, subscribers, subscription, feedburner alternative, comments
-Requires at least: 3.7
-Tested up to: 4.1
+Tags: feedburner, feedburner plugin, feedpress, feedpress plugin, feedblitz, feedblitz plugin, feed, feed plugin, feeds, feedsmith, redirect, redirects, redirection, rss, seo, subscribe, subscribers, subscription, feedburner alternative, comments
+Requires at least: 3.8
+Tested up to: 4.2
 Stable tag: trunk
 
 This plugin detects native WordPress feeds and redirects them to your FeedBurner, FeedPress, or FeedBlitz feed so you can track your subscribers.
 
 == Description == 
 
+One of the **easiest** ways to implement your FeedBurner, FeedPress, or FeedBlitz feed on your WordPress site. *It just works.*
+
 This plugin redirects all requests for your native WordPress feeds to your FeedBurner, FeedPress, or FeedBlitz feeds so you can track all your subscribers and maximize your blog/site readership and user engagement.
+
+This allows you to implement your favorite third-party feed optimization service without having to touch or modify an `.htaccess` file.
 
 You can redirect both your main WordPress feed and your comments feed if you like. (Comments feed is optional since not everyone uses it.)
 
 This plugin is a fork of the original FeedBurner Feedsmith plugin by Steve Smith. Since it was discontinued, I picked up where it left off so we all can have an actively updated plugin.
 
-As of version 1.4.6, this plugin supports FeedPress and FeedBlitz, popular FeedBurner alternatives.
+As of version 1.4.6, this plugin supports **FeedPress and FeedBlitz, *popular FeedBurner alternatives***.
 
 = Documentation / Tech Support =
 * Documentation: [Plugin Homepage](http://www.redsandmarketing.com/plugins/rs-feedburner/)
@@ -28,12 +32,18 @@ Features:
 * Fast
 * Compatible
 
-One of the **easiest** ways to implement your FeedBurner, FeedPress, or FeedBlitz feed on your WordPress site. *It just works.*
+You will need a FeedBurner, FeedPress, or FeedBlitz account to use this plugin.
 
 Important: If you are using a caching plugin, you will need to set it to *not* cache your *feeds*. (Cache plugins usually have an "exclude" setting so you can specify which pages won't be cached.)
 
 = More Info / Documentation =
 For more info and full documentation, visit the [RS FeedBurner homepage](http://www.redsandmarketing.com/plugins/rs-feedburner/ "RS FeedBurner homepage").
+
+= Requirements =
+
+* A FeedBurner, FeedPress, or FeedBlitz account
+* WordPress 3.8 or higher (Recommended: WordPress 4.0 or higher)
+* PHP 5.3 or higher (Recommended: PHP 5.4 or higher)
 
 == Installation ==
 
@@ -69,11 +79,20 @@ For more info and full documentation, visit the [RS FeedBurner homepage](http://
 
 = Next Steps After Installation = 
 
-1. Go to the options page and enter the URL of your FeedBurner feed, and click *Save Settings*.
+1. Go to the options page and enter the URL of your FeedBurner, FeedPress, or FeedBlitz feed, and click *Save Settings*.
 
-2. You can optionally enter your comments feed url on FeedBurner if you have one setup.
+2. You can optionally enter your comments feed url on FeedBurner, FeedPress, or FeedBlitz if you have one setup.
 
-You are good to go...it's that easy.
+You are good to go...it's that easy. After this, just log into your FeedBurner, FeedPress, or FeedBlitz account to view your subscriber data.
+
+= Other Notes =
+
+Important: If you are using a caching plugin, you will need to set it to *not cache* your feeds. (Cache plugins usually have an "exclude" setting so you can specify which pages won't be cached.)
+
+This plugin has not been designed specifically for use with Multisite. It can be used in Multisite if activated *per site*, but *should not* be Network Activated. As with any plugin, test and make sure it works with your particular setup before using on a production site.
+
+= More Info / Documentation =
+For more info and full documentation, visit the [RS FeedBurner homepage](http://www.redsandmarketing.com/plugins/rs-feedburner/).
 
 == Frequently Asked Questions ==
 
@@ -88,6 +107,28 @@ Optional: If you have a FeedBurner, FeedPress, or FeedBlitz feed setup for your 
 Absolutely...go to my [WordPress Consulting](http://www.redsandmarketing.com/web-design/wordpress-consulting/ "WordPress Consulting") page for more information.
 
 == Changelog ==
+
+= 1.5 =
+*released 07/15/15*
+
+* Made various code improvements, tweaks, and minor fixes.
+
+= 1.4.9 =
+*released 06/21/15*
+
+* Made various minor code improvements.
+
+= 1.4.8 =
+*released 04/23/15*
+
+* Increased minimum required WordPress version to 3.8.
+* Added an `.htaccess` file to the `rs-feedburner` directory to control browser access to certain files.
+* Made various minor code improvements.
+
+= 1.4.7 =
+*released 04/11/15*
+
+* Added a fix to prevent network activation when used in multisite, and added network admin notice to explain. The plugin can be used in multisite just fine, but will need to be activated individually per site for now. Once we can get time to adapt the plugin to multisite more specifically, we can remove this restriction.
 
 = 1.4.6 =
 *released 03/21/15*
@@ -172,5 +213,5 @@ Absolutely...go to my [WordPress Consulting](http://www.redsandmarketing.com/web
 This plugin is a fork of the original FeedBurner Feedsmith plugin by Steve Smith. Since it was discontinued, I picked up where it left off so we all can have an actively updated plugin.
 
 == Upgrade Notice ==
-= 1.4.6 =
-Added support for FeedPress and FeedBlitz, FeedBurner alternatives, and made various code improvements. Please see Changelog for details.
+= 1.5 =
+Made various code improvements, tweaks, and minor fixes. Please see Changelog for details.
