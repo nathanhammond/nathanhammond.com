@@ -34,9 +34,9 @@
 					twentyfifteen_the_custom_logo();
 
 					if ( is_front_page() && is_home() ) : ?>
-						<h1 class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></h1>
+						<h1 class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span class="lightext"><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></h1>
 					<?php else : ?>
-						<p class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></p>
+						<p class="lightext ultralightext site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><span class="lightext"><?php echo implode('</span><span class="ultralightext">', explode(' ', get_bloginfo( 'name' ))); ?></span></a></p>
 					<?php endif;
 
 					$description = get_bloginfo( 'description', 'display' );
