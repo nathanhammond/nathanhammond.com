@@ -382,11 +382,11 @@ function get_the_category_rss($type = null) {
 	$filter = 'rss';
 	if ( 'atom' == $type )
 		$filter = 'raw';
-	/*
+
 	if ( !empty($categories) ) foreach ( (array) $categories as $category ) {
 		$cat_names[] = sanitize_term_field('name', $category->name, $category->term_id, 'category', $filter);
 	}
-	*/
+
 	if ( !empty($tags) ) foreach ( (array) $tags as $tag ) {
 		$cat_names[] = sanitize_term_field('name', $tag->name, $tag->term_id, 'post_tag', $filter);
 	}
