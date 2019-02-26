@@ -1,8 +1,21 @@
 <?php
-add_action( 'wp_enqueue_scripts', 'my_theme_enqueue_styles' );
+/**
+ * Repair the styles for Crayon.
+ */
 function my_theme_enqueue_styles() {
 	wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
 }
+add_action( 'wp_enqueue_scripts', 'my_theme_enqueue_styles' );
+
+/**
+ * Add in the fonts for the site:
+ * - .ultralightext
+ * - .lightext
+ */
+function add_logo_fonts() {
+	echo '<script type="text/javascript" src="https://fast.fonts.net/jsapi/f8cd41e5-4561-41b2-a213-3722142ffac8.js"></script>';
+}
+add_action( 'wp_head', 'add_logo_fonts' );
 
 /**
  * 1. Copy the upstream function into the theme.
@@ -37,6 +50,5 @@ function get_the_category_rss_extraction($the_list, $type) {
 
 	return $the_list;
 }
-
 add_filter('the_category_rss', 'get_the_category_rss_extraction', 10, 2);
 ?>

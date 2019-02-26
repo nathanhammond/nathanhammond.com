@@ -1,4 +1,3 @@
-<?php return; ?>
 <?php
 /**
  * The template for displaying Author bios

@@ -18,8 +18,6 @@
 	<!--[if lt IE 9]>
 	<script src="<?php echo esc_url( get_template_directory_uri() ); ?>/js/html5.js"></script>
 	<![endif]-->
-	<script type="text/javascript" src="https://fast.fonts.net/jsapi/f8cd41e5-4561-41b2-a213-3722142ffac8.js"></script>
-	<script>(function(){document.documentElement.className='js'})();</script>
 	<?php wp_head(); ?>
 </head>
 
