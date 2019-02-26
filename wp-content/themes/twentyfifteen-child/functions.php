@@ -1,5 +1,13 @@
 <?php
 /**
+ * Only one author, so no need to link to a "posts by author page."
+ */
+function replace_author_link( $link, $author_id, $author_nicename ) {
+	return get_the_author_meta( 'user_url' );
+}
+add_filter( 'author_link', 'replace_author_link', 10, 3 );
+
+/**
  * Repair the styles for Crayon.
  */
 function my_theme_enqueue_styles() {
