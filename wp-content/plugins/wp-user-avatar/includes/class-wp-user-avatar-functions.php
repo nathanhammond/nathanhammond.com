@@ -115,7 +115,12 @@ class WP_User_Avatar_Functions {
       }
       
       //end
-       $gravatar = 'http://www.gravatar.com/avatar/'.$hash.'?d=404';
+       if ( isset( $_SERVER['HTTPS'] ) && ( 'on' == $_SERVER['HTTPS'] || 1 == $_SERVER['HTTPS'] ) || isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' == $_SERVER['HTTP_X_FORWARDED_PROTO'] ) { 
+        $http='https';
+      }else{
+        $http='http';
+      }
+      $gravatar = $http.'://www.gravatar.com/avatar/'.$hash.'?d=404';
       
       $data = wp_cache_get($hash);
 
@@ -330,6 +335,10 @@ class WP_User_Avatar_Functions {
     
     global $avatar_default, $mustache_admin, $mustache_avatar, $mustache_medium, $mustache_original, $mustache_thumbnail, $post, $wpua_avatar_default, $wpua_disable_gravatar, $wpua_functions;
     // User has WPUA
+
+    if( $alt == '' ) {
+       $alt = __("Avatar",'wp-user-avatar');
+    }
     
 
 	   $avatar = str_replace('gravatar_default','',$avatar);
@@ -409,7 +418,10 @@ class WP_User_Avatar_Functions {
       if(!$wpua_functions->wpua_has_gravatar($id_or_email) && $avatar_default == 'wp_user_avatar') {
         // Show custom Default Avatar
         if(!empty($wpua_avatar_default) && $wpua_functions->wpua_attachment_is_image($wpua_avatar_default)) {
-          $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, array($size,$size));
+         // $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, array($size,$size));
+      $size_numeric_w_x_h = array( get_option( $size . '_size_w' ), get_option( $size . '_size_h' ) );  
+      $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, $size_numeric_w_x_h); 
+   
           $default = $wpua_avatar_default_image[0];
         } else {
           $default = $mustache_avatar;
@@ -423,7 +435,10 @@ class WP_User_Avatar_Functions {
       }
     } else {
       if(!empty($wpua_avatar_default) && $wpua_functions->wpua_attachment_is_image($wpua_avatar_default)) {
-        $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, array($size,$size));
+//      $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, array($size,$size));
+        $size_numeric_w_x_h = array( get_option( $size . '_size_w' ), get_option( $size . '_size_h' ) );
+        $wpua_avatar_default_image = $wpua_functions->wpua_get_attachment_image_src($wpua_avatar_default, $size_numeric_w_x_h);
+
         $default = $wpua_avatar_default_image[0];
       } else {
         $default = $mustache_avatar;
@@ -438,6 +453,7 @@ class WP_User_Avatar_Functions {
      */
     return apply_filters('wpua_get_avatar_original', $default);
   }
+
 
   /**
    * Find WPUA, show get_avatar if empty
