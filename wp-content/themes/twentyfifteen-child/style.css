@@ -13,3 +13,14 @@
 */
 
 .crayon-table { font-size: inherit; }
+
+/* The font names are a lie. */
+@font-face {
+  font-family: "Noto Sans";
+  src: local("Helvetica Neue"), local("HelveticaNeue"), local("Helvetica"), local("Arial");
+}
+
+@font-face {
+  font-family: "Noto Serif";
+  src: local("Helvetica Neue"), local("HelveticaNeue"), local("Helvetica"), local("Arial");
+}
