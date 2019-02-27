@@ -1,5 +1,26 @@
 <?php
 /**
+ * Based on callsite, filter get_bloginfo( 'name' ).
+ */
+function callsite_aware_bloginfo( $output, $show ) {
+	if ( $show == 'name' ) {
+		$e = new Exception;
+		$trace = $e->getTrace();
+
+		// Only modifying it for one particular invocation.
+		$file = $trace[4]['file'];
+		$position = strrpos($file, "twentyfifteen/header.php");
+
+		if ($position !== false) {
+			$output = '<span class="lightext">nathan</span><span class="ultralightext">hammond</span>';
+		}
+	}
+
+	return $output;
+}
+add_filter( 'bloginfo', 'callsite_aware_bloginfo', 10, 2 );
+
+/**
  * Only one author, so no need to link to a "posts by author page."
  */
 function replace_author_link( $link, $author_id, $author_nicename ) {
