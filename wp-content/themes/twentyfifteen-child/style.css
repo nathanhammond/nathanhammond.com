@@ -12,8 +12,6 @@
  Text Domain:  twenty-fifteen-child
 */
 
-.crayon-table { font-size: inherit; }
-
 /* The font names are a lie. */
 @font-face {
   font-family: "Noto Sans";
