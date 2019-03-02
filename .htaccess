@@ -12,6 +12,20 @@ RewriteRule ^(.*)$ https://www.nathanhammond.com%{REQUEST_URI} [L,R=301,NE]
 </IfModule>
 # END HTTPS
 
+# BEGIN Support old RSS URLs from Habari.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Comments URLs
+RewriteCond %{REQUEST_URI} ^/atom/comments$ 
+RewriteRule ^.*$ https://www.nathanhammond.com/comments/feed [L,NE,R=301]
+
+# Entries URLs
+RewriteCond %{REQUEST_URI} ^/atom.*$
+RewriteRule ^.*$ https://www.nathanhammond.com/feed [L,NE,R=301]
+</IfModule>
+# END Support old RSS URLs from Habari.
+
 # BEGIN Custom
 <IfModule mod_rewrite.c>
 RewriteEngine On
