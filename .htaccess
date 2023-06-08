@@ -1,0 +1,49 @@
+# Old redirect.
+Redirect 301 /jquery-conference-2008 /jquery-camp-2008
+
+Options All -Indexes
+
+# BEGIN HTTPS
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ https://www.nathanhammond.com%{REQUEST_URI} [L,R=301,NE]
+</IfModule>
+# END HTTPS
+
+# BEGIN Support old RSS URLs from Habari.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Comments URLs
+RewriteCond %{REQUEST_URI} ^/atom/comments$ 
+RewriteRule ^.*$ https://www.nathanhammond.com/comments/feed [L,NE,R=301]
+
+# Entries URLs
+RewriteCond %{REQUEST_URI} ^/atom.*$
+RewriteRule ^.*$ https://www.nathanhammond.com/feed [L,NE,R=301]
+</IfModule>
+# END Support old RSS URLs from Habari.
+
+# BEGIN Custom
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_URI} ^(/|/index.php)$
+RewriteCond %{QUERY_STRING} (.*(?:^|&))s=([^&]*)&?(.*)&?$
+RewriteRule ^.*$ /search/%2?%1%3 [NE,R,L]
+</IfModule>
+# END Custom
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
+
